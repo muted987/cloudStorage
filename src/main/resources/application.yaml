@@ -1,0 +1,30 @@
+server:
+  port: 8080
+  servlet:
+    session:
+      timeout: 30m
+      cookie:
+        same-site: none
+        name: SESSION
+
+
+
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5432/auth-manager
+    driver-class-name: org.postgresql.Driver
+    username: postgres
+    password: root
+  flyway:
+    schemas: public, user_management
+  data:
+    redis:
+      port: 6379
+      host: localhost
+
+logging:
+  config: classpath:logback-spring.xml
+  level:
+    com.muted987.cloudStorage.controller: DEBUG
+    com.muted987.cloudStorage.service: DEBUG
+    org.hibernate.sql: DEBUG
