@@ -5,6 +5,7 @@ import com.muted987.cloudStorage.dto.request.LoginDTO;
 import com.muted987.cloudStorage.dto.request.RegisterDTO;
 import com.muted987.cloudStorage.dto.response.UserResponse;
 import com.muted987.cloudStorage.service.AuthService;
+import com.muted987.cloudStorage.service.MinioService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
@@ -22,14 +23,17 @@ public class AuthController {
 
 
     private final AuthService authService;
+    private final MinioService minioService;
 
     @PostMapping("/sign-up")
     @ResponseStatus(HttpStatus.CREATED)
     public UserResponse registerUser(@RequestBody @Valid RegisterDTO registerDTO,
                                      HttpServletRequest httpServletRequest,
-                                     HttpServletResponse httpServletResponse){
+                                     HttpServletResponse httpServletResponse) throws Exception {
         log.info("POST /api/auth/sign-up - Registration user {}", registerDTO.username());
-        return this.authService.registerUser(registerDTO, httpServletResponse, httpServletRequest);
+        UserResponse userResponse = this.authService.registerUser(registerDTO, httpServletResponse, httpServletRequest);
+        minioService.createFolder("", userResponse.id());
+        return userResponse;
     }
 
     @PostMapping("/sign-in")

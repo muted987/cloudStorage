@@ -2,6 +2,7 @@ package com.muted987.cloudStorage.dto.request;
 
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
+import lombok.Data;
 
 public record LoginDTO(
         @Size(min=5, max=15, message="Длина логина должна быть между 5 и 15 символами")

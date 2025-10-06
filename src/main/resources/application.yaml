@@ -1,26 +1,31 @@
 server:
-  port: 8080
+  port: ${SERVER_PORT}
   servlet:
     session:
-      timeout: 30m
       cookie:
         same-site: none
         name: SESSION
+        secure: false
 
 
 
 spring:
   datasource:
-    url: jdbc:postgresql://localhost:5432/auth-manager
-    driver-class-name: org.postgresql.Driver
-    username: postgres
-    password: root
+    url: ${HIBERNATE_URL}
+    driver-class-name: ${HIBERNATE_DRIVER_CLASS_NAME}
+    username: ${HIBERNATE_USERNAME}
+    password: ${HIBERNATE_PASSWORD}
   flyway:
     schemas: public, user_management
   data:
     redis:
-      port: 6379
-      host: localhost
+      port: ${REDIS_PORT}
+      host: ${REDIS_HOST}
+      timeout: ${REDIS_SESSION_TIMEOUT}
+
+token:
+  signing:
+    key: ${JWT_SIGNING_KEY}
 
 logging:
   config: classpath:logback-spring.xml
@@ -28,3 +33,10 @@ logging:
     com.muted987.cloudStorage.controller: DEBUG
     com.muted987.cloudStorage.service: DEBUG
     org.hibernate.sql: DEBUG
+
+
+minio:
+  url: ${MINIO_URL}
+  access-key: ${MINIO_ACCESS_KEY}
+  secret-key: ${MINIO_SECRET_KEY}
+  base-bucket-name: ${MINIO_BASE_BUCKET_NAME}

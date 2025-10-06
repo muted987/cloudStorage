@@ -29,7 +29,7 @@ public class UserService {
         try {
             User newUser = this.userMapper.fromRegisterDTOToUser(registerDTO);
             newUser.setPassword(this.bCryptPasswordEncoder.encode(newUser.getPassword()));
-            newUser.setRole("USER");
+            newUser.setRole("ROLE_USER");
             log.debug("Creating new user with {} username", registerDTO.username());
             return this.userRepository.save(newUser);
         } catch (ConstraintViolationException e) {

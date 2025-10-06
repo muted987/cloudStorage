@@ -14,7 +14,9 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.context.SecurityContextImpl;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.web.context.SecurityContextRepository;
 import org.springframework.stereotype.Service;
 
@@ -28,6 +30,7 @@ public class AuthService {
     private final AuthenticationManager authenticationManager;
     private final SecurityContextRepository securityContextRepository;
     private final UserMapper userMapper;
+    private final ApplicationUserDetailsService applicationUserDetailsService;
 
     public UserResponse registerUser(RegisterDTO registerDTO,
                                      HttpServletResponse httpResponse,
@@ -50,11 +53,13 @@ public class AuthService {
                                      HttpServletRequest httpRequest,
                                      Authentication authenticationResponse) {
         SecurityContext securityContext = new SecurityContextImpl(authenticationResponse);
+        SecurityContextHolder.setContext(securityContext);
         this.securityContextRepository.saveContext(securityContext, httpRequest, httpResponse);
     }
 
     private Authentication authenticateUser(String username, String password) {
-        Authentication authenticationRequest = UsernamePasswordAuthenticationToken.unauthenticated(username, password);
-        return this.authenticationManager.authenticate(authenticationRequest);
+        UserDetails userDetails = applicationUserDetailsService.loadUserByUsername(username);
+        Authentication authentication = new UsernamePasswordAuthenticationToken(userDetails, password);
+        return this.authenticationManager.authenticate(authentication);
     }
 }
