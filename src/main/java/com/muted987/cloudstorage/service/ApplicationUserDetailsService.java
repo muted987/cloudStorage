@@ -16,7 +16,7 @@ public class ApplicationUserDetailsService implements UserDetailsService {
     private final UserRepository userRepository;
 
     @Override
-    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+    public UserDetails loadUserByUsername(String username) {
         return this.userRepository.findByUsername(username)
                 .map(user -> CustomUserDetails.builder()
                         .id(user.getId())

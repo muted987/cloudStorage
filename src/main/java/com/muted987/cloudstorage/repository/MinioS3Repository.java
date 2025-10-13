@@ -8,8 +8,8 @@ import org.springframework.stereotype.Repository;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.ByteArrayInputStream;
-import java.io.IOException;
 import java.io.InputStream;
+import java.util.Optional;
 
 @RequiredArgsConstructor
 @Repository
@@ -23,7 +23,7 @@ public class MinioS3Repository implements S3Repository {
 
     @Override
     public void createBucket(String bucketName) throws Exception {
-        minioClient.makeBucket(
+        this.minioClient.makeBucket(
                 MakeBucketArgs.builder()
                         .bucket(bucketName)
                         .build()
@@ -32,7 +32,7 @@ public class MinioS3Repository implements S3Repository {
 
     @Override
     public boolean bucketExist(String bucketName) throws Exception {
-        return minioClient.bucketExists(
+        return this.minioClient.bucketExists(
                 BucketExistsArgs.builder()
                         .bucket(bucketName)
                         .build()
@@ -40,28 +40,28 @@ public class MinioS3Repository implements S3Repository {
     }
 
     @Override
-    public void createDirectory(String fullPath) throws Exception {
-        minioClient.putObject(
+    public void createDirectory(String path) throws Exception {
+        this.minioClient.putObject(
                 PutObjectArgs.builder()
                         .bucket(baseBucketName)
-                        .object(fullPath)
+                        .object(path)
                         .stream(new ByteArrayInputStream(new byte[0]), 0, -1)
                         .build());
     }
 
     @Override
-    public StatObjectResponse getObjectStat(String fullPath) throws Exception {
-        return minioClient.statObject(
+    public StatObjectResponse getObjectStat(String path) throws Exception {
+        return this.minioClient.statObject(
                 StatObjectArgs.builder()
                         .bucket(baseBucketName)
-                        .object(fullPath)
+                        .object(path)
                         .build()
         );
     }
 
     @Override
     public Iterable<Result<Item>> getListObjects(String prefix) {
-        return minioClient.listObjects(
+        return this.minioClient.listObjects(
                 ListObjectsArgs.builder()
                         .bucket(baseBucketName)
                         .prefix(prefix)
@@ -70,22 +70,44 @@ public class MinioS3Repository implements S3Repository {
     }
 
     @Override
-    public void removeObject(String fullPath) throws Exception {
-        minioClient.removeObject(
-                RemoveObjectArgs.builder()
+    public Iterable<Result<Item>> getListObjectsRecursive(String prefix) {
+        return this.minioClient.listObjects(
+                ListObjectsArgs.builder()
                         .bucket(baseBucketName)
-                        .object(fullPath)
+                        .prefix(prefix)
+                        .recursive(true)
                         .build()
         );
     }
 
-    public ObjectWriteResponse putObject(String objectName, MultipartFile multipartFile) throws Exception {
-        return minioClient.putObject(
-                PutObjectArgs.builder()
+    @Override
+    public void removeObject(String path) throws Exception {
+        this.minioClient.removeObject(
+                RemoveObjectArgs.builder()
                         .bucket(baseBucketName)
-                        .object(objectName)
-                        .stream(multipartFile.getInputStream(), multipartFile.getSize(), -1)
-                        .contentType(multipartFile.getContentType())
+                        .object(path)
+                        .build()
+        );
+    }
+
+    @Override
+    public void putObject(String objectName, MultipartFile multipartFile) throws Exception {
+        this.minioClient.putObject(
+            PutObjectArgs.builder()
+                    .bucket(baseBucketName)
+                    .object(objectName)
+                    .stream(multipartFile.getInputStream(), multipartFile.getSize(), -1)
+                    .contentType(multipartFile.getContentType())
+                    .build()
+        );
+    }
+
+    @Override
+    public InputStream getObject(String path) throws Exception {
+        return this.minioClient.getObject(
+                GetObjectArgs.builder()
+                        .bucket(baseBucketName)
+                        .object(path)
                         .build()
         );
     }

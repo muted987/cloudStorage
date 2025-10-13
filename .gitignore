@@ -32,7 +32,7 @@ build/
 ### VS Code ###
 .vscode/
 
-.env
+/src/main/resources/.env
 cloudStorage.iml
 mvnw.cmd
 mvnw

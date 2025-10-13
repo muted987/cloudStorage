@@ -12,7 +12,6 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -37,11 +36,19 @@ public class AuthController {
     }
 
     @PostMapping("/sign-in")
-    public ResponseEntity<?> loginUser(@RequestBody @Valid LoginDTO loginDTO,
-                                       HttpServletRequest httpServletRequest,
-                                       HttpServletResponse httpServletResponse){
+    @ResponseStatus(HttpStatus.OK)
+    public UserResponse loginUser(@RequestBody @Valid LoginDTO loginDTO,
+                                  HttpServletRequest httpServletRequest,
+                                  HttpServletResponse httpServletResponse){
         log.info("POST /api/auth/sign-in - Login user {}", loginDTO.username());
-        return new ResponseEntity<>(this.authService.loginUser(loginDTO, httpServletResponse, httpServletRequest), HttpStatus.OK);
+        return this.authService.loginUser(loginDTO, httpServletResponse, httpServletRequest);
+    }
+
+    @PostMapping("/sign-out")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void logout(HttpServletRequest httpServletRequest,
+                       HttpServletResponse httpServletResponse){
+        this.authService.logoutUser(httpServletRequest, httpServletResponse);
     }
 
 }

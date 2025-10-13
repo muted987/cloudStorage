@@ -1,9 +1,13 @@
 package com.muted987.cloudStorage.controller;
 
+import com.muted987.cloudStorage.controller.payload.PathParam;
 import com.muted987.cloudStorage.dto.response.resourceResponse.DirectoryResponse;
 import com.muted987.cloudStorage.dto.response.resourceResponse.ResourceResponse;
 import com.muted987.cloudStorage.security.CustomUserDetails;
 import com.muted987.cloudStorage.service.MinioService;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Pattern;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
@@ -22,16 +26,16 @@ public class DirectoryController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public DirectoryResponse createFolder(@RequestParam String path,
+    public DirectoryResponse createFolder(@Valid @ModelAttribute PathParam pathParam,
                                           @AuthenticationPrincipal CustomUserDetails userDetails) throws Exception {
-        return minioService.createFolder(path, userDetails.getId());
+        return minioService.createFolder(pathParam.path(), userDetails.getId());
     }
 
     @GetMapping
     @ResponseStatus(HttpStatus.OK)
-    public List<ResourceResponse> getDirectory(@RequestParam String path,
+    public List<ResourceResponse> getDirectory(@Valid @ModelAttribute PathParam pathParam,
                                                @AuthenticationPrincipal CustomUserDetails userDetails) throws Exception{
-        return minioService.getDirectory(path, userDetails.getId());
+        return minioService.getDirectory(pathParam.path(), userDetails.getId());
     }
 
 }

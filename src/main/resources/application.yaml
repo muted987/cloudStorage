@@ -7,8 +7,6 @@ server:
         name: SESSION
         secure: false
 
-
-
 spring:
   datasource:
     url: ${HIBERNATE_URL}
@@ -22,10 +20,9 @@ spring:
       port: ${REDIS_PORT}
       host: ${REDIS_HOST}
       timeout: ${REDIS_SESSION_TIMEOUT}
-
-token:
-  signing:
-    key: ${JWT_SIGNING_KEY}
+  servlet:
+    multipart:
+      max-file-size: 10MB
 
 logging:
   config: classpath:logback-spring.xml
@@ -33,7 +30,6 @@ logging:
     com.muted987.cloudStorage.controller: DEBUG
     com.muted987.cloudStorage.service: DEBUG
     org.hibernate.sql: DEBUG
-
 
 minio:
   url: ${MINIO_URL}
