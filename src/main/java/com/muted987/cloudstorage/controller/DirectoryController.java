@@ -4,10 +4,9 @@ import com.muted987.cloudStorage.controller.payload.PathParam;
 import com.muted987.cloudStorage.dto.response.resourceResponse.DirectoryResponse;
 import com.muted987.cloudStorage.dto.response.resourceResponse.ResourceResponse;
 import com.muted987.cloudStorage.security.CustomUserDetails;
-import com.muted987.cloudStorage.service.MinioService;
+import com.muted987.cloudStorage.service.minioService.DirectoryService;
 import jakarta.validation.Valid;
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Pattern;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
@@ -16,26 +15,25 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/directory")
+@RequiredArgsConstructor
 public class DirectoryController {
 
-    private final MinioService minioService;
+    private final DirectoryService directoryService;
 
-    public DirectoryController(MinioService minioService) {
-        this.minioService = minioService;
-    }
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public DirectoryResponse createFolder(@Valid @ModelAttribute PathParam pathParam,
-                                          @AuthenticationPrincipal CustomUserDetails userDetails) throws Exception {
-        return minioService.createFolder(pathParam.path(), userDetails.getId());
+                                          @AuthenticationPrincipal CustomUserDetails userDetails) {
+        return this.directoryService.createFolder(pathParam.path(), userDetails.getId());
     }
 
+    //TODO: Заменить pathParam для валидации директории
     @GetMapping
     @ResponseStatus(HttpStatus.OK)
     public List<ResourceResponse> getDirectory(@Valid @ModelAttribute PathParam pathParam,
-                                               @AuthenticationPrincipal CustomUserDetails userDetails) throws Exception{
-        return minioService.getDirectory(pathParam.path(), userDetails.getId());
+                                               @AuthenticationPrincipal CustomUserDetails userDetails) {
+        return this.directoryService.getDirectory(pathParam.path(), userDetails.getId());
     }
 
 }
