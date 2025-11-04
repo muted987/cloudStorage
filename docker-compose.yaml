@@ -3,7 +3,7 @@ version: '3.9'
 services:
   postgres:
     image: postgres:latest
-    container_name: auth-db
+    container_name: container-postgres
     restart: always
     environment:
       POSTGRES_DB: auth-manager
@@ -16,7 +16,7 @@ services:
 
   redis:
     image: redis:latest
-    container_name: auth-redis
+    container_name: container-redis
     restart: always
     ports:
       - "${REDIS_PORT}:6379"
@@ -25,7 +25,7 @@ services:
 
   minio:
     image: minio/minio:latest
-    container_name: auth-minio
+    container_name: container-minio
     restart: always
     environment:
       MINIO_ROOT_USER: ${MINIO_ACCESS_KEY}
@@ -41,7 +41,7 @@ services:
 
   app:
     build: .
-    container_name: auth-app
+    container_name: cloud-storage-app
     restart: always
     depends_on:
       - postgres
@@ -69,17 +69,20 @@ services:
       - app-network
 
   frontend:
-    image: cloud-storage-frontend:latest
-    container_name: auth-frontend
+    build:
+      context: ./cloud-storage-frontend
+      dockerfile: Dockerfile
+    container_name: cloud-storage-frontend
     restart: always
     depends_on:
       - app
     ports:
-      - "3000:3000"
+      - "3000:80"
     environment:
-      - REACT_APP_API_URL=http://app:3000
+      - REACT_APP_API_URL=https://app:3000
     networks:
       - app-network
+
 volumes:
   postgres_data:
   minio_data:
