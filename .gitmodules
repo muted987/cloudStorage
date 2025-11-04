@@ -1,0 +1,3 @@
+[submodule "cloud-storage-frontend"]
+	path = cloud-storage-frontend
+	url = https://github.com/zhukovsd/cloud-storage-frontend
