@@ -114,19 +114,11 @@ public class DirectoryService {
     }
 
     private boolean isFolderExist(String path, int id) {
-        String parentPath;
-        if (!path.endsWith("/")) {
-            path = path.substring(0, path.lastIndexOf("/") + 1);
-            parentPath = path;
-        } else {
-            parentPath = PathUtil.getParentPath(path);
-        }
         if (isRootFolder(path)) {
             return true;
         }
-        String finalPath = path;
-        return getDirectory(parentPath, id).stream()
-                .anyMatch(resourceResponse -> resourceResponse.getPath().concat(resourceResponse.getName()).equals(finalPath));
+        String parentPath = PathUtil.getParentPath(path);
+        return this.minioS3Repository.isObjectExist(PathUtil.formatPath(id, parentPath));
     }
 
     private boolean isRootFolder(String path) {
