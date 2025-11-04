@@ -1,5 +1,6 @@
 package com.muted987.cloudStorage.dto.response.resourceResponse;
 
+import lombok.Builder;
 import lombok.Getter;
 import lombok.experimental.SuperBuilder;
 
@@ -8,6 +9,7 @@ import lombok.experimental.SuperBuilder;
 public class FileResponse extends ResourceResponse {
 
     private int size;
-    private final ResourceType type = ResourceType.FILE;
+    @Builder.Default
+    private ResourceType type = ResourceType.FILE;
 
 }

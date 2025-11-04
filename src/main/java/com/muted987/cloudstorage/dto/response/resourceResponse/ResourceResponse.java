@@ -11,7 +11,9 @@ import lombok.experimental.SuperBuilder;
 @NoArgsConstructor
 @AllArgsConstructor
 public abstract class ResourceResponse {
+
     protected String path;
     protected String name;
+    protected ResourceType type;
 
 }

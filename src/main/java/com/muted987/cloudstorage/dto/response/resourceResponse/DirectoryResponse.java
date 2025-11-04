@@ -1,5 +1,6 @@
 package com.muted987.cloudStorage.dto.response.resourceResponse;
 
+import lombok.Builder;
 import lombok.Getter;
 import lombok.experimental.SuperBuilder;
 
@@ -7,7 +8,8 @@ import lombok.experimental.SuperBuilder;
 @Getter
 public class DirectoryResponse extends ResourceResponse {
 
-    private final ResourceType type = ResourceType.DIRECTORY;
+    @Builder.Default
+    private ResourceType type = ResourceType.DIRECTORY;
 
 
 
