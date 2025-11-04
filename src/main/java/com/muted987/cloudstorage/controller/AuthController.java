@@ -31,7 +31,7 @@ public class AuthController {
                                      HttpServletResponse httpServletResponse) {
         log.info("POST /api/auth/sign-up - Registration user {}", registerDTO.username());
         UserResponse userResponse = this.authService.registerUser(registerDTO, httpServletResponse, httpServletRequest);
-        this.directoryService.createFolder("", userResponse.id());
+        this.directoryService.createRootFolder(userResponse.id());
         return userResponse;
     }
 

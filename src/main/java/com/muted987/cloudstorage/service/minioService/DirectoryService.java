@@ -47,6 +47,18 @@ public class DirectoryService {
         return getResourceResponses(result, refactoredPath);
     }
 
+    public void createRootFolder(int id){
+        String rootFolderPath = PathUtil.formatPath(id, "");
+        if (isFolderExist(rootFolderPath, id)) {
+            log.warn("Исключение выброшено в методе createRootFolder");
+            throw new ResourceAlreadyExistsException("Папка уже существует");
+        }
+        try {
+            this.minioS3Repository.createDirectory(rootFolderPath);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
 
     public DirectoryResponse createFolder(String path, int id) {
         if (!isParentFolderExist(path, id)) {
@@ -60,11 +72,11 @@ public class DirectoryService {
         String formattedPath = PathUtil.formatPath(id, path);
         ObjectWriteResponse result;
         try {
-            result = minioS3Repository.createDirectory(formattedPath);
+            result = this.minioS3Repository.createDirectory(formattedPath);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
-        return resourceResponseMapper.toDirectoryResponse(result, formattedPath);
+        return this.resourceResponseMapper.toDirectoryResponse(result, formattedPath);
     }
 
     private boolean isParentFolderExist(String path, int id) {
@@ -102,9 +114,9 @@ public class DirectoryService {
                     continue;
                 }
                 if (object.objectName().endsWith("/")) {
-                    resourceResponses.add(resourceResponseMapper.toDirectoryResponse(object, formattedPath));
+                    resourceResponses.add(this.resourceResponseMapper.toDirectoryResponse(object, formattedPath));
                 } else {
-                    resourceResponses.add(resourceResponseMapper.toFileResponse(object, formattedPath));
+                    resourceResponses.add(this.resourceResponseMapper.toFileResponse(object, formattedPath));
                 }
             } catch (Exception e) {
                 throw new RuntimeException(e);
