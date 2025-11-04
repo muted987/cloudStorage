@@ -57,7 +57,7 @@ class PathUtilTest {
     void getParentPathsTest(){
 
         String testPath = "folder1/folder2/folder3/";
-        List<String> exceptedList = new ArrayList<>(List.of("folder1/folder2/folder3/", "folder1/folder2/", "folder1/"));
+        List<String> exceptedList = new ArrayList<>(List.of("folder1/", "folder1/folder2/", "folder1/folder2/folder3/"));
 
         List<String> result = PathUtil.getParentPaths(testPath);
         result.forEach(System.out::println);
