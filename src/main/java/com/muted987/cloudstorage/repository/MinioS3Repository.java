@@ -1,15 +1,16 @@
 package com.muted987.cloudStorage.repository;
 
 import io.minio.*;
+import io.minio.errors.ErrorResponseException;
 import io.minio.messages.Item;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Repository;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
-import java.util.Optional;
 
 @RequiredArgsConstructor
 @Repository
@@ -40,8 +41,8 @@ public class MinioS3Repository implements S3Repository {
     }
 
     @Override
-    public void createDirectory(String path) throws Exception {
-        this.minioClient.putObject(
+    public ObjectWriteResponse createDirectory(String path) throws Exception {
+        return this.minioClient.putObject(
                 PutObjectArgs.builder()
                         .bucket(baseBucketName)
                         .object(path)
@@ -80,6 +81,7 @@ public class MinioS3Repository implements S3Repository {
         );
     }
 
+
     @Override
     public void removeObject(String path) throws Exception {
         this.minioClient.removeObject(
@@ -91,14 +93,14 @@ public class MinioS3Repository implements S3Repository {
     }
 
     @Override
-    public void putObject(String objectName, MultipartFile multipartFile) throws Exception {
-        this.minioClient.putObject(
-            PutObjectArgs.builder()
-                    .bucket(baseBucketName)
-                    .object(objectName)
-                    .stream(multipartFile.getInputStream(), multipartFile.getSize(), -1)
-                    .contentType(multipartFile.getContentType())
-                    .build()
+    public ObjectWriteResponse putObject(String objectName, MultipartFile multipartFile) throws Exception {
+        return this.minioClient.putObject(
+                PutObjectArgs.builder()
+                        .bucket(baseBucketName)
+                        .object(objectName)
+                        .stream(multipartFile.getInputStream(), multipartFile.getSize(), -1)
+                        .contentType(multipartFile.getContentType())
+                        .build()
         );
     }
 
@@ -110,5 +112,19 @@ public class MinioS3Repository implements S3Repository {
                         .object(path)
                         .build()
         );
+    }
+
+    @Override
+    public boolean isObjectExist(String path) {
+        try {
+            getObject(path);
+            return true;
+        } catch (ErrorResponseException e) {
+            if (e.response().code() == HttpStatus.NOT_FOUND.value())
+                return false;
+            throw new RuntimeException();
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 }
