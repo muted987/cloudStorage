@@ -2,11 +2,12 @@ package com.muted987.cloudStorage.controller;
 
 
 import com.muted987.cloudStorage.dto.response.ExceptionMessage;
+import com.muted987.cloudStorage.exception.ParentFolderNotExist;
+import com.muted987.cloudStorage.exception.ResourceAlreadyExistsException;
 import com.muted987.cloudStorage.exception.ResourceNotFoundException;
 import com.muted987.cloudStorage.exception.UserAlreadyExistException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.boot.autoconfigure.graphql.GraphQlProperties;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -34,17 +35,23 @@ public class GlobalExceptionHandler {
                 .build();
     }
 
-    @ExceptionHandler(ResourceNotFoundException.class)
+    @ExceptionHandler({
+            ResourceNotFoundException.class,
+            ParentFolderNotExist.class,
+    })
     @ResponseStatus(HttpStatus.NOT_FOUND)
-    public ExceptionMessage handleResourceNotFoundException(ResourceNotFoundException exception){
+    public ExceptionMessage handleNotFoundException(Exception exception) {
         return ExceptionMessage.builder()
                 .message(exception.getMessage())
                 .build();
     }
 
-    @ExceptionHandler(UserAlreadyExistException.class)
+    @ExceptionHandler({
+            ResourceAlreadyExistsException.class,
+            UserAlreadyExistException.class,
+    })
     @ResponseStatus(HttpStatus.CONFLICT)
-    public ExceptionMessage handleUserAlreadyExistException(UserAlreadyExistException exception) {
+    public ExceptionMessage handleAlreadyExistsException(Exception exception) {
         return ExceptionMessage.builder()
                 .message(exception.getMessage())
                 .build();
@@ -68,7 +75,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler({Exception.class, RuntimeException.class})
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
-    public ExceptionMessage handleException() {
+    public ExceptionMessage handleException(Exception exception) {
         return ExceptionMessage.builder()
                 .message("unexpected exception")
                 .build();
