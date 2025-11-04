@@ -5,7 +5,6 @@ import com.muted987.cloudStorage.configuration.TestConfig;
 import com.muted987.cloudStorage.dto.request.LoginDTO;
 import com.muted987.cloudStorage.dto.request.RegisterDTO;
 import com.muted987.cloudStorage.repository.UserRepository;
-import com.muted987.cloudStorage.service.AuthService;
 import com.muted987.cloudStorage.service.UserService;
 import jakarta.servlet.http.Cookie;
 import org.junit.jupiter.api.BeforeEach;
@@ -40,8 +39,6 @@ class AuthControllerTest {
 
     @Autowired
     private UserRepository userRepository;
-    @Autowired
-    private AuthService authService;
 
     @BeforeEach
     void clearDb() {
