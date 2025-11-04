@@ -1,19 +1,19 @@
 package com.muted987.cloudStorage.service;
 
 
-import com.muted987.cloudStorage.dto.request.LoginDTO;
 import com.muted987.cloudStorage.dto.request.RegisterDTO;
 import com.muted987.cloudStorage.entity.User;
 import com.muted987.cloudStorage.exception.UserAlreadyExistException;
 import com.muted987.cloudStorage.mapper.UserMapper;
 import com.muted987.cloudStorage.repository.UserRepository;
-import jakarta.validation.ConstraintViolationException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.hibernate.exception.ConstraintViolationException;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import java.util.Optional;
+import java.util.Objects;
 
 @Service
 @RequiredArgsConstructor
@@ -32,14 +32,16 @@ public class UserService {
             newUser.setRole("ROLE_USER");
             log.debug("Creating new user with {} username", registerDTO.username());
             return this.userRepository.save(newUser);
-        } catch (ConstraintViolationException e) {
-            throw new UserAlreadyExistException("User with name %s already exist".formatted(registerDTO.username()));
+        } catch (DataIntegrityViolationException e) {
+            if (e.getCause() instanceof ConstraintViolationException constraintViolationException) {
+                if (Objects.requireNonNull(constraintViolationException.getMessage()).contains("unique")) {
+                    throw new UserAlreadyExistException("User with name %s already exist".formatted(registerDTO.username()));
+                }
+            }
+            throw new RuntimeException();
+        } catch (RuntimeException e){
+            throw new RuntimeException();
         }
-    }
-
-    public Optional<User> getUser(LoginDTO loginDTO) {
-        log.debug("Requesting user with {} username", loginDTO.username());
-        return this.userRepository.findByUsername(loginDTO.username());
     }
 
 }
