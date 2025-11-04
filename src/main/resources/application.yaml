@@ -7,6 +7,12 @@ server:
         name: SESSION
         secure: false
 
+minio:
+  url: ${MINIO_URL}
+  access-key: ${MINIO_ACCESS_KEY}
+  secret-key: ${MINIO_SECRET_KEY}
+  base-bucket-name: ${MINIO_BASE_BUCKET_NAME}
+
 spring:
   datasource:
     url: ${HIBERNATE_URL}
@@ -31,8 +37,4 @@ logging:
     com.muted987.cloudStorage.service: DEBUG
     org.hibernate.sql: DEBUG
 
-minio:
-  url: ${MINIO_URL}
-  access-key: ${MINIO_ACCESS_KEY}
-  secret-key: ${MINIO_SECRET_KEY}
-  base-bucket-name: ${MINIO_BASE_BUCKET_NAME}
+

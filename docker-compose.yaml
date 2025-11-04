@@ -1,0 +1,89 @@
+version: '3.9'
+
+services:
+  postgres:
+    image: postgres:latest
+    container_name: auth-db
+    restart: always
+    environment:
+      POSTGRES_DB: auth-manager
+      POSTGRES_USER: ${HIBERNATE_USERNAME}
+      POSTGRES_PASSWORD: ${HIBERNATE_PASSWORD}
+    ports:
+      - "5434:5432"
+    networks:
+      - app-network
+
+  redis:
+    image: redis:latest
+    container_name: auth-redis
+    restart: always
+    ports:
+      - "${REDIS_PORT}:6379"
+    networks:
+      - app-network
+
+  minio:
+    image: minio/minio:latest
+    container_name: auth-minio
+    restart: always
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ACCESS_KEY}
+      MINIO_ROOT_PASSWORD: ${MINIO_SECRET_KEY}
+    command: server /data --console-address ":9001"
+    ports:
+      - "9002:9000"
+      - "9001:9001"
+    volumes:
+      - minio_data:/data
+    networks:
+      - app-network
+
+  app:
+    build: .
+    container_name: auth-app
+    restart: always
+    depends_on:
+      - postgres
+      - redis
+      - minio
+    ports:
+      - "${SERVER_PORT}:8080"
+    environment:
+      SERVER_PORT: ${SERVER_PORT}
+      HIBERNATE_URL: ${HIBERNATE_URL}
+      HIBERNATE_DRIVER_CLASS_NAME: ${HIBERNATE_DRIVER_CLASS_NAME}
+      HIBERNATE_USERNAME: ${HIBERNATE_USERNAME}
+      HIBERNATE_PASSWORD: ${HIBERNATE_PASSWORD}
+      REDIS_PORT: ${REDIS_PORT}
+      REDIS_HOST: ${REDIS_HOST}
+      REDIS_SESSION_TIMEOUT: ${REDIS_SESSION_TIMEOUT}
+      MINIO_URL: ${MINIO_URL}
+      MINIO_ACCESS_KEY: ${MINIO_ACCESS_KEY}
+      MINIO_SECRET_KEY: ${MINIO_SECRET_KEY}
+      MINIO_BASE_BUCKET_NAME: ${MINIO_BASE_BUCKET_NAME}
+      HIBERNATE_CONTAINER_USERNAME: ${HIBERNATE_CONTAINER_USERNAME}
+      HIBERNATE_CONTAINER_PASSWORD: ${HIBERNATE_CONTAINER_PASSWORD}
+      HIBERNATE_CONTAINER_NAME: ${HIBERNATE_CONTAINER_NAME}
+    networks:
+      - app-network
+
+  frontend:
+    image: cloud-storage-frontend:latest
+    container_name: auth-frontend
+    restart: always
+    depends_on:
+      - app
+    ports:
+      - "3000:3000"
+    environment:
+      - REACT_APP_API_URL=http://app:3000
+    networks:
+      - app-network
+volumes:
+  postgres_data:
+  minio_data:
+
+networks:
+  app-network:
+    driver: bridge
