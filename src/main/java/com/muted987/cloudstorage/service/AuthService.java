@@ -19,7 +19,6 @@ import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.context.SecurityContextImpl;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.web.authentication.logout.LogoutHandler;
 import org.springframework.security.web.context.SecurityContextRepository;
 import org.springframework.stereotype.Service;
 
@@ -62,7 +61,12 @@ public class AuthService {
     }
 
     private void clearCookie(HttpServletResponse httpResponse, HttpServletRequest httpRequest) {
-        List<Cookie> cookies = List.of(httpRequest.getCookies());
+        List<Cookie> cookies;
+        try {
+            cookies = List.of(httpRequest.getCookies());
+        } catch (NullPointerException e) {
+            throw new RuntimeException(e);
+        }
         for (Cookie cookie : cookies){
             Cookie emptyCookie = new Cookie(cookie.getName(), null);
             emptyCookie.setPath(cookie.getPath());
