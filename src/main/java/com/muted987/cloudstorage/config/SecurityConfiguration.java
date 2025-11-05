@@ -49,6 +49,8 @@ public class SecurityConfiguration {
                                 "/api/auth/sign-up",
                                 "/api/auth/sign-in"
                         ).permitAll()
+                        .requestMatchers("/v3/api-docs/**").permitAll()
+                        .requestMatchers("/swagger-ui/**").permitAll()
                         .anyRequest().authenticated())
                 .exceptionHandling(exceptionHandling -> exceptionHandling
                         .authenticationEntryPoint(new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED)))
