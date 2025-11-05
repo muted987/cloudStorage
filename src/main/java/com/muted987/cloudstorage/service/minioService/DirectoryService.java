@@ -79,16 +79,6 @@ public class DirectoryService {
         return this.resourceResponseMapper.toDirectoryResponse(result, formattedPath);
     }
 
-    private boolean isParentFolderExist(String path, int id) {
-        String parentPath = PathUtil.getParentPath(path);
-        String parentPathOfParentPath = PathUtil.getParentPath(parentPath);
-        if (parentPathOfParentPath.isEmpty()) {
-            return true;
-        }
-        return getDirectory(parentPathOfParentPath, id).stream()
-                .anyMatch(resourceResponse -> resourceResponse.getPath().concat(resourceResponse.getName()).equals(parentPath));
-    }
-
     public List<ResourceResponse> createParentFolders(String path, int id) {
         List<String> folderPaths = PathUtil.getParentPaths(path.substring(0, path.lastIndexOf("/") + 1));
         List<ResourceResponse> resourceResponses = new ArrayList<>();
@@ -129,8 +119,17 @@ public class DirectoryService {
         if (isRootFolder(path)) {
             return true;
         }
+        return this.minioS3Repository.isObjectExist(PathUtil.formatPath(id, path));
+    }
+
+    private boolean isParentFolderExist(String path, int id) {
         String parentPath = PathUtil.getParentPath(path);
-        return this.minioS3Repository.isObjectExist(PathUtil.formatPath(id, parentPath));
+        String parentPathOfParentPath = PathUtil.getParentPath(parentPath);
+        if (parentPathOfParentPath.isEmpty()) {
+            return true;
+        }
+        return getDirectory(parentPathOfParentPath, id).stream()
+                .anyMatch(resourceResponse -> resourceResponse.getPath().concat(resourceResponse.getName()).equals(parentPath));
     }
 
     private boolean isRootFolder(String path) {

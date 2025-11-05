@@ -67,10 +67,10 @@ public class ResourceService {
             throw new RuntimeException();
         }
         String resourceFileFullName = resource.getResource().getFilename();
-        if (isResourceExist(resourceFileFullName, id)) {
+        String formattedUploadPath = PathUtil.formatPath(id, requestPath, resourceFileFullName);
+        if (isResourceExist(formattedUploadPath, id)) {
             throw new ResourceAlreadyExistsException("Файл уже существует");
         }
-        String formattedUploadPath = PathUtil.formatPath(id, requestPath, resourceFileFullName);
         List<ResourceResponse> uploadedResources = new ArrayList<>();
         if (resourceFileFullName.contains("/")) {
             uploadedResources = this.directoryService.createParentFolders(resourceFileFullName, id);
