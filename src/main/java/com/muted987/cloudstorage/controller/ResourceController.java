@@ -1,19 +1,19 @@
 package com.muted987.cloudStorage.controller;
 
 
+import com.muted987.cloudStorage.config.annotations.swagger.resource.DeleteResource;
+import com.muted987.cloudStorage.config.annotations.swagger.resource.DownloadResource;
+import com.muted987.cloudStorage.config.annotations.swagger.resource.GetResource;
+import com.muted987.cloudStorage.config.annotations.swagger.resource.MoveResource;
+import com.muted987.cloudStorage.config.annotations.swagger.resource.SearchResource;
+import com.muted987.cloudStorage.config.annotations.swagger.resource.UploadResource;
 import com.muted987.cloudStorage.controller.payload.MoveParam;
 import com.muted987.cloudStorage.controller.payload.PathParam;
 import com.muted987.cloudStorage.controller.payload.QueryParam;
-import com.muted987.cloudStorage.dto.response.ExceptionMessage;
 import com.muted987.cloudStorage.dto.response.resourceResponse.ResourceResponse;
 import com.muted987.cloudStorage.security.CustomUserDetails;
 import com.muted987.cloudStorage.service.minioService.ResourceService;
-import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
-import io.swagger.v3.oas.annotations.media.ArraySchema;
-import io.swagger.v3.oas.annotations.media.Content;
-import io.swagger.v3.oas.annotations.media.Schema;
-import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
@@ -23,7 +23,14 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestPart;
+import org.springframework.web.bind.annotation.ResponseStatus;
+import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
@@ -39,114 +46,21 @@ public class ResourceController {
 
     private final ResourceService resourceService;
 
-    @Operation(
-            summary = "Upload resource method",
-            description = "Method to upload resource to user's folder",
-            requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
-                    description = "User files to upload",
-                    content = @Content(
-                            mediaType = MediaType.MULTIPART_FORM_DATA_VALUE,
-                            schema = @Schema(implementation = MultipartFile.class)
-                    )
-            ),
-            responses = {
-                    @ApiResponse(
-                            description = "Resource uploaded with success",
-                            responseCode = "201",
-                            content = @Content(
-                                    mediaType = MediaType.APPLICATION_JSON_VALUE,
-                                    array = @ArraySchema(schema = @Schema(implementation = ResourceResponse.class))
-                            )
-                    ),
-                    @ApiResponse(
-                            description = "Validation Error",
-                            responseCode = "400",
-                            content = @Content(
-                                    mediaType = MediaType.APPLICATION_JSON_VALUE,
-                                    schema = @Schema(implementation = ExceptionMessage.class)
-                            )
-                    ),
-                    @ApiResponse(
-                            description = "Unauthorized user request error",
-                            responseCode = "401",
-                            content = @Content(
-                                    mediaType = MediaType.APPLICATION_JSON_VALUE,
-                                    schema = @Schema(implementation = ExceptionMessage.class)
-                            )
-                    ),
-                    @ApiResponse(
-                            description = "Resource already exist",
-                            responseCode = "409",
-                            content = @Content(
-                                    mediaType = MediaType.APPLICATION_JSON_VALUE,
-                                    schema = @Schema(implementation = ExceptionMessage.class)
-                            )
-                    ),
-                    @ApiResponse(
-                            description = "Eternal error",
-                            responseCode = "500",
-                            content = @Content(
-                                    mediaType = MediaType.APPLICATION_JSON_VALUE,
-                                    schema = @Schema(implementation = ExceptionMessage.class)
-                            )
-                    )
-            }
-    )
+    @UploadResource
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @ResponseStatus(HttpStatus.CREATED)
-    public List<ResourceResponse> uploadResource(@NotNull(message = "Отсутствует файл")
-                                                 @RequestPart("object") MultipartFile multipartFile,
-                                                 @Parameter(
+    public List<ResourceResponse> uploadResource(@Parameter(
                                                          description = "Path to new directory",
                                                          required = true
                                                  )
                                                  @Valid @ModelAttribute PathParam pathParam,
+                                                 @NotNull(message = "Отсутствует файл")
+                                                 @RequestPart("object") MultipartFile multipartFile,
                                                  @AuthenticationPrincipal CustomUserDetails userDetails) throws Exception {
         return this.resourceService.uploadResource(pathParam.path(), multipartFile, userDetails.getId());
     }
 
-    @Operation(
-            summary = "Deleting resource method",
-            description = "Method to delete resource from user's folder",
-            responses = {
-                    @ApiResponse(
-                            description = "Resource deleted with success",
-                            responseCode = "204"
-                    ),
-                    @ApiResponse(
-                            description = "Validation Error",
-                            responseCode = "400",
-                            content = @Content(
-                                    mediaType = MediaType.APPLICATION_JSON_VALUE,
-                                    schema = @Schema(implementation = ExceptionMessage.class)
-                            )
-                    ),
-                    @ApiResponse(
-                            description = "Unauthorized user request error",
-                            responseCode = "401",
-                            content = @Content(
-                                    mediaType = MediaType.APPLICATION_JSON_VALUE,
-                                    schema = @Schema(implementation = ExceptionMessage.class)
-                            )
-                    ),
-                    @ApiResponse(
-                            description = "Resource not found",
-                            responseCode = "404",
-                            content = @Content(
-                                    mediaType = MediaType.APPLICATION_JSON_VALUE,
-                                    schema = @Schema(implementation = ExceptionMessage.class)
-                            )
-                    ),
-                    @ApiResponse(
-                            description = "Eternal error",
-                            responseCode = "500",
-                            content = @Content(
-                                    mediaType = MediaType.APPLICATION_JSON_VALUE,
-                                    schema = @Schema(implementation = ExceptionMessage.class)
-                            )
-                    )
-            }
-    )
+    @DeleteResource
     @DeleteMapping()
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deleteResource(@Parameter(
@@ -158,61 +72,7 @@ public class ResourceController {
         this.resourceService.deleteResource(pathParam.path(), userDetails.getId());
     }
 
-    @Operation(
-            summary = "Move resource method",
-            description = "Method to move resource from path1(\"from\") to path2(\"to\")",
-            responses = {
-                    @ApiResponse(
-                            description = "Resource moved with success",
-                            responseCode = "200",
-                            content = @Content(
-                                    mediaType = MediaType.APPLICATION_JSON_VALUE,
-                                    schema = @Schema(implementation = ResourceResponse.class)
-                            )
-
-                    ),
-                    @ApiResponse(
-                            description = "Validation Error",
-                            responseCode = "400",
-                            content = @Content(
-                                    mediaType = MediaType.APPLICATION_JSON_VALUE,
-                                    schema = @Schema(implementation = ExceptionMessage.class)
-                            )
-                    ),
-                    @ApiResponse(
-                            description = "Unauthorized user request error",
-                            responseCode = "401",
-                            content = @Content(
-                                    mediaType = MediaType.APPLICATION_JSON_VALUE,
-                                    schema = @Schema(implementation = ExceptionMessage.class)
-                            )
-                    ),
-                    @ApiResponse(
-                            description = "Resource not found",
-                            responseCode = "404",
-                            content = @Content(
-                                    mediaType = MediaType.APPLICATION_JSON_VALUE,
-                                    schema = @Schema(implementation = ExceptionMessage.class)
-                            )
-                    ),
-                    @ApiResponse(
-                            description = "Resource on \"to\" path already exist",
-                            responseCode = "409",
-                            content = @Content(
-                                    mediaType = MediaType.APPLICATION_JSON_VALUE,
-                                    schema = @Schema(implementation = ExceptionMessage.class)
-                            )
-                    ),
-                    @ApiResponse(
-                            description = "Eternal error",
-                            responseCode = "500",
-                            content = @Content(
-                                    mediaType = MediaType.APPLICATION_JSON_VALUE,
-                                    schema = @Schema(implementation = ExceptionMessage.class)
-                            )
-                    )
-            }
-    )
+    @MoveResource
     @GetMapping("move")
     @ResponseStatus(HttpStatus.OK)
     public ResourceResponse moveResource(@Parameter(
@@ -224,52 +84,7 @@ public class ResourceController {
         return this.resourceService.moveResource(moveParam.from(), moveParam.to(), userDetails.getId());
     }
 
-    @Operation(
-            summary = "Download resource method",
-            description = "Method to download file or archive(.zip)",
-            responses = {
-                    @ApiResponse(
-                            description = "Resource downloaded with success",
-                            responseCode = "200",
-                            content = @Content(
-                                    mediaType = MediaType.APPLICATION_OCTET_STREAM_VALUE,
-                                    schema = @Schema(type = "string", format = "binary")
-                            )
-                    ),
-                    @ApiResponse(
-                            description = "Validation Error",
-                            responseCode = "400",
-                            content = @Content(
-                                    mediaType = MediaType.APPLICATION_JSON_VALUE,
-                                    schema = @Schema(implementation = ExceptionMessage.class)
-                            )
-                    ),
-                    @ApiResponse(
-                            description = "Unauthorized user request error",
-                            responseCode = "401",
-                            content = @Content(
-                                    mediaType = MediaType.APPLICATION_JSON_VALUE,
-                                    schema = @Schema(implementation = ExceptionMessage.class)
-                            )
-                    ),
-                    @ApiResponse(
-                            description = "Resource not found",
-                            responseCode = "404",
-                            content = @Content(
-                                    mediaType = MediaType.APPLICATION_JSON_VALUE,
-                                    schema = @Schema(implementation = ExceptionMessage.class)
-                            )
-                    ),
-                    @ApiResponse(
-                            description = "Eternal error",
-                            responseCode = "500",
-                            content = @Content(
-                                    mediaType = MediaType.APPLICATION_JSON_VALUE,
-                                    schema = @Schema(implementation = ExceptionMessage.class)
-                            )
-                    )
-            }
-    )
+    @DownloadResource
     @GetMapping(value = "download", produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
     @ResponseStatus(HttpStatus.OK)
     public ResponseEntity<byte[]> downloadResource(@Parameter(
@@ -287,53 +102,7 @@ public class ResourceController {
 
     }
 
-    @Operation(
-            summary = "Get resource method",
-            description = "Method to get path, name, size of a resource",
-            responses = {
-                    @ApiResponse(
-                            description = "Getting resource with success",
-                            responseCode = "200",
-                            content = @Content(
-                                    mediaType = MediaType.APPLICATION_JSON_VALUE,
-                                    schema = @Schema(implementation = ResourceResponse.class)
-                            )
-                    ),
-                    @ApiResponse(
-                            description = "Validation Error",
-                            responseCode = "400",
-                            content = @Content(
-                                    mediaType = MediaType.APPLICATION_JSON_VALUE,
-                                    schema = @Schema(implementation = ExceptionMessage.class)
-                            )
-                    ),
-                    @ApiResponse(
-                            description = "Unauthorized user request error",
-                            responseCode = "401",
-                            content = @Content(
-                                    mediaType = MediaType.APPLICATION_JSON_VALUE,
-                                    schema = @Schema(implementation = ExceptionMessage.class)
-                            )
-                    ),
-                    @ApiResponse(
-                            description = "Resource not found",
-                            responseCode = "404",
-                            content = @Content(
-                                    mediaType = MediaType.APPLICATION_JSON_VALUE,
-                                    schema = @Schema(implementation = ExceptionMessage.class)
-                            )
-                    ),
-                    @ApiResponse(
-                            description = "Eternal error",
-                            responseCode = "500",
-                            content = @Content(
-                                    mediaType = MediaType.APPLICATION_JSON_VALUE,
-                                    schema = @Schema(implementation = ExceptionMessage.class)
-                            )
-                    )
-            }
-    )
-
+    @GetResource
     @GetMapping
     @ResponseStatus(HttpStatus.OK)
     public ResourceResponse getResource(@Parameter(
@@ -345,44 +114,7 @@ public class ResourceController {
         return this.resourceService.getResource(pathParam.path(), userDetails.getId());
     }
 
-    @Operation(
-            summary = "Search resource method",
-            description = "Method to search resource in entire storage",
-            responses = {
-                    @ApiResponse(
-                            description = "Resource founded with success",
-                            responseCode = "200",
-                            content = @Content(
-                                    mediaType = MediaType.APPLICATION_JSON_VALUE,
-                                    schema = @Schema(implementation = ResourceResponse.class)
-                            )
-                    ),
-                    @ApiResponse(
-                            description = "Validation Error",
-                            responseCode = "400",
-                            content = @Content(
-                                    mediaType = MediaType.APPLICATION_JSON_VALUE,
-                                    schema = @Schema(implementation = ExceptionMessage.class)
-                            )
-                    ),
-                    @ApiResponse(
-                            description = "Unauthorized user request error",
-                            responseCode = "401",
-                            content = @Content(
-                                    mediaType = MediaType.APPLICATION_JSON_VALUE,
-                                    schema = @Schema(implementation = ExceptionMessage.class)
-                            )
-                    ),
-                    @ApiResponse(
-                            description = "Eternal error",
-                            responseCode = "500",
-                            content = @Content(
-                                    mediaType = MediaType.APPLICATION_JSON_VALUE,
-                                    schema = @Schema(implementation = ExceptionMessage.class)
-                            )
-                    )
-            }
-    )
+    @SearchResource
     @GetMapping("search")
     @ResponseStatus(HttpStatus.OK)
     public List<ResourceResponse> searchResource(@Parameter(
