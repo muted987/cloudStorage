@@ -29,30 +29,38 @@ public class DirectoryService {
 
     public List<ResourceResponse> getDirectory(String requestPath, int id) {
         String formattedPath = PathUtil.formatPath(id, requestPath);
+
         if (!isFolderExist(requestPath, id)) {
             log.warn("Исключение выброшено в методе getDirectory");
             throw new ResourceNotFoundException("Папка не существует");
         }
+
         Iterable<Result<Item>> result = minioS3Repository.getListObjects(formattedPath);
+
         return getResourceResponses(result, formattedPath);
     }
 
     public List<ResourceResponse> getDirectoryRecursive(String requestPath, int id) {
         String refactoredPath = PathUtil.formatPath(id, requestPath);
+
         if (!isFolderExist(requestPath, id)) {
             log.warn("Исключение выброшено в методе getDirectoryRecursive");
             throw new ResourceNotFoundException("Папка не существует");
         }
+
         Iterable<Result<Item>> result = minioS3Repository.getListObjectsRecursive(refactoredPath);
+
         return getResourceResponses(result, refactoredPath);
     }
 
     public void createRootFolder(int id){
         String rootFolderPath = PathUtil.formatPath(id, "");
+
         if (isFolderExist(rootFolderPath, id)) {
             log.warn("Исключение выброшено в методе createRootFolder");
             throw new ResourceAlreadyExistsException("Папка уже существует");
         }
+
         try {
             this.minioS3Repository.createDirectory(rootFolderPath);
         } catch (Exception e) {
@@ -61,27 +69,33 @@ public class DirectoryService {
     }
 
     public DirectoryResponse createFolder(String path, int id) {
+
         if (!isParentFolderExist(path, id)) {
             log.warn("Исключение выброшено в методе createFolder");
             throw new ParentFolderNotExist("Родительская папка не существует");
         }
+
         if (isFolderExist(path, id)) {
             log.warn("Исключение выброшено в методе createFolder");
             throw new ResourceAlreadyExistsException("Папка уже существует");
         }
+
         String formattedPath = PathUtil.formatPath(id, path);
         ObjectWriteResponse result;
+
         try {
             result = this.minioS3Repository.createDirectory(formattedPath);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
+
         return this.resourceResponseMapper.toDirectoryResponse(result, formattedPath);
     }
 
     public List<ResourceResponse> createParentFolders(String path, int id) {
         List<String> folderPaths = PathUtil.getParentPaths(path.substring(0, path.lastIndexOf("/") + 1));
         List<ResourceResponse> resourceResponses = new ArrayList<>();
+
         for (String folderPath : folderPaths) {
             try {
                 resourceResponses.add(createFolder(folderPath, id));
@@ -92,6 +106,7 @@ public class DirectoryService {
                 throw new RuntimeException(e);
             }
         }
+
         return resourceResponses;
     }
 

@@ -28,10 +28,13 @@ public class UserService {
     public User createUser(RegisterDTO registerDTO) {
         try {
             User newUser = this.userMapper.fromRegisterDTOToUser(registerDTO);
+
             newUser.setPassword(this.bCryptPasswordEncoder.encode(newUser.getPassword()));
             newUser.setRole("ROLE_USER");
+
             log.debug("Creating new user with {} username", registerDTO.username());
             return this.userRepository.save(newUser);
+
         } catch (DataIntegrityViolationException e) {
             if (e.getCause() instanceof ConstraintViolationException constraintViolationException) {
                 if (Objects.requireNonNull(constraintViolationException.getMessage()).contains("unique")) {

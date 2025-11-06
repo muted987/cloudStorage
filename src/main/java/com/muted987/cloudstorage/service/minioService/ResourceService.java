@@ -45,9 +45,11 @@ public class ResourceService {
         if (!isResourceExist(requestPath, id)) {
             throw new ResourceNotFoundException("Ресурс не найден");
         }
+
         String formattedPath = PathUtil.formatPath(id, requestPath);
         String parentPath = PathUtil.getParentPath(requestPath);
         String formattedParentPath = PathUtil.formatPath(id, parentPath);
+
         try {
             StatObjectResponse statObjectResponse = minioS3Repository.getObjectStat(formattedPath);
             if (statObjectResponse.object().endsWith("/")) {
@@ -66,17 +68,22 @@ public class ResourceService {
         if (resource.getResource().getFilename() == null) {
             throw new RuntimeException();
         }
+
         String resourceFileFullName = resource.getResource().getFilename();
         String formattedUploadPath = PathUtil.formatPath(id, requestPath, resourceFileFullName);
+
         if (isResourceExist(formattedUploadPath, id)) {
             throw new ResourceAlreadyExistsException("Файл уже существует");
         }
+
         List<ResourceResponse> uploadedResources = new ArrayList<>();
         if (resourceFileFullName.contains("/")) {
             uploadedResources = this.directoryService.createParentFolders(resourceFileFullName, id);
         }
+
         ObjectWriteResponse objectWriteResponse = this.minioS3Repository.putObject(formattedUploadPath, resource);
         uploadedResources.add(this.resourceResponseMapper.toFileResponse(objectWriteResponse, PathUtil.formatPath(id, requestPath)));
+
         return uploadedResources;
     }
 
@@ -85,6 +92,7 @@ public class ResourceService {
         List<ResourceResponse> resourceResponses = this.directoryService.getDirectoryRecursive("", id).stream()
                 .filter(resourceResponse -> resourceResponse.getPath().concat(resourceResponse.getName()).contains(query.trim()))
                 .toList();
+
         return resourceResponses.stream()
                 .peek(resourceResponse -> {
                     resourceResponse.setPath(PathUtil.getParentPath(resourceResponse.getName()));
@@ -98,25 +106,32 @@ public class ResourceService {
         if (!isResourceExist(requestPath, id)) {
             throw new ResourceNotFoundException("Ресурс не найден");
         }
+
         try (ByteArrayOutputStream baos = new ByteArrayOutputStream();
              ZipOutputStream zos = new ZipOutputStream(baos)) {
             List<ResourceResponse> resourceResponses = this.directoryService.getDirectoryRecursive(requestPath, id);
             String formattedPath = PathUtil.formatPath(id, requestPath);
+
             if (resourceResponses.isEmpty()) {
                 InputStream inputStream = this.minioS3Repository.getObject(formattedPath);
                 return IOUtils.toByteArray(inputStream);
             }
+
             List<String> pathsForDownload = new ArrayList<>(resourceResponses.stream().
                     map(resourceResponse -> PathUtil.formatPath(id, resourceResponse.getPath().concat(resourceResponse.getName())))
                     .toList());
             pathsForDownload.add(0, formattedPath);
             Collections.reverse(pathsForDownload);
+
             for (String pathForDownload : pathsForDownload) {
                 InputStream inputStream = this.minioS3Repository.getObject(pathForDownload);
                 ZipUtil.addStreamToZip(zos, inputStream, PathUtil.reformatPath(pathForDownload));
             }
+
             zos.finish();
+
             return baos.toByteArray();
+
         } catch (ResourceNotFoundException e) {
             throw new ResourceNotFoundException(e.getMessage());
         } catch (Exception e) {
@@ -130,16 +145,20 @@ public class ResourceService {
             if (!isResourceExist(requestPath, id)) {
                 throw new ResourceNotFoundException("Ресурс не найден");
             }
+
             List<ResourceResponse> resourceResponses = this.directoryService.getDirectoryRecursive(requestPath, id);
             String formattedPath = PathUtil.formatPath(id, requestPath);
+
             if (resourceResponses.isEmpty()) {
                 this.minioS3Repository.removeObject(formattedPath);
             }
+
             List<String> pathsForDelete = new ArrayList<>(resourceResponses.stream()
                     .map(resourceResponse -> PathUtil.formatPath(id, resourceResponse.getPath().concat(resourceResponse.getName())))
                     .toList());
             pathsForDelete.add(0, formattedPath);
             Collections.reverse(pathsForDelete);
+
             for (String pathForDelete : pathsForDelete) {
                 this.minioS3Repository.removeObject(pathForDelete);
             }
@@ -154,9 +173,12 @@ public class ResourceService {
                                          int id) {
         try {
             byte[] resourceFrom = downloadResource(from, id);
+
             MultipartFile multipartFile = new ByteArrayMultipartFile(resourceFrom, to.substring(to.lastIndexOf("/") + 1));
             List<ResourceResponse> resourceResponses = uploadResource(PathUtil.getParentPath(to), multipartFile, id);
+
             deleteResource(from, id);
+
             return resourceResponses.stream()
                     .filter(resourceResponse ->
                             to.equals(resourceResponse.getPath().concat(resourceResponse.getName())))

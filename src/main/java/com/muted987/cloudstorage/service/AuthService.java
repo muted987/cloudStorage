@@ -39,34 +39,45 @@ public class AuthService {
     public UserResponse registerUser(RegisterDTO registerDTO,
                                      HttpServletResponse httpResponse,
                                      HttpServletRequest httpRequest){
+
         User user = this.userService.createUser(registerDTO);
+
         Authentication authenticationResponse = authenticateUser(registerDTO.username(), registerDTO.password());
         saveSecurityContext(httpResponse, httpRequest, authenticationResponse);
+
         return userMapper.toUserResponseFromUser(user);
     }
 
     public UserResponse loginUser(LoginDTO loginDTO,
                                   HttpServletResponse httpResponse,
                                   HttpServletRequest httpRequest) {
+
         Authentication authenticationResponse = authenticateUser(loginDTO.username(), loginDTO.password());
         saveSecurityContext(httpResponse, httpRequest, authenticationResponse);
+
         return userMapper.toUserResponseFromLoginDTO(loginDTO);
     }
 
     public void logoutUser(HttpServletRequest httpRequest,
                            HttpServletResponse httpResponse) {
+
         clearSecurityContext(httpRequest, httpResponse);
+
         invalidateSession(httpRequest);
+
         clearCookie(httpResponse, httpRequest);
     }
 
-    private void clearCookie(HttpServletResponse httpResponse, HttpServletRequest httpRequest) {
+    private void clearCookie(HttpServletResponse httpResponse,
+                             HttpServletRequest httpRequest) {
         List<Cookie> cookies;
+
         try {
             cookies = List.of(httpRequest.getCookies());
         } catch (NullPointerException e) {
             throw new RuntimeException(e);
         }
+
         for (Cookie cookie : cookies){
             Cookie emptyCookie = new Cookie(cookie.getName(), null);
             emptyCookie.setPath(cookie.getPath());
@@ -94,12 +105,14 @@ public class AuthService {
                                      Authentication authenticationResponse) {
         SecurityContext securityContext = new SecurityContextImpl(authenticationResponse);
         SecurityContextHolder.setContext(securityContext);
+
         this.securityContextRepository.saveContext(securityContext, httpRequest, httpResponse);
     }
 
     private Authentication authenticateUser(String username, String password) {
         UserDetails userDetails = applicationUserDetailsService.loadUserByUsername(username);
         Authentication authentication = new UsernamePasswordAuthenticationToken(userDetails, password);
+
         return this.authenticationManager.authenticate(authentication);
     }
 }
