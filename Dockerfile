@@ -1,4 +1,4 @@
-FROM openjdk:25-jdk-slim
+FROM openjdk:25-ea-25-jdk-slim
 
 ARG JAR_FILE=target/*.jar
 
