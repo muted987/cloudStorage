@@ -1,4 +1,4 @@
-FROM maven:3.6.3-jdk-11 AS builder
+FROM maven:3.9.9-eclipse-temurin-21 AS builder
 COPY pom.xml .
 COPY src ./src
 RUN mvn clean package -DskipTests
