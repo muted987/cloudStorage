@@ -59,7 +59,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler({MethodArgumentNotValidException.class})
     @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public List<ExceptionMessage> handleNotValidException(MethodArgumentNotValidException exception) {
+    public ExceptionMessage handleNotValidException(MethodArgumentNotValidException exception) {
         List<ExceptionMessage> errors = new ArrayList<>();
         exception.getBindingResult().getAllErrors().forEach((error) -> {
             String message = error.getDefaultMessage();
@@ -69,7 +69,7 @@ public class GlobalExceptionHandler {
                             .build()
             );
         });
-        return errors;
+        return errors.getFirst();
     }
 
 
