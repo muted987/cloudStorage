@@ -69,7 +69,7 @@ public class GlobalExceptionHandler {
                             .build()
             );
         });
-        return errors.getFirst();
+        return errors.get(0);
     }
 
 
