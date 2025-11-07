@@ -7,7 +7,7 @@ public record RegisterDTO(
         @Size(min=5, max=20, message="Длина логина должна быть между {min} и {max} символами")
         @NotNull(message="Заполните поле Логин")
         String username,
-        @Size(min=8, max=20, message="Длина пароля должна быть между {min} и {max} символами")
+        @Size(min=5, max=20, message="Длина пароля должна быть между {min} и {max} символами")
         @NotNull(message="Заполните поле Пароль")
         String password
 ) {
