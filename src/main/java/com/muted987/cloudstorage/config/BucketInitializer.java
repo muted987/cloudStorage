@@ -1,6 +1,6 @@
 package com.muted987.cloudStorage.config;
 
-import com.muted987.cloudStorage.repository.MinioS3Repository;
+import com.muted987.cloudStorage.repository.s3Repository.MinioRepository;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
@@ -14,12 +14,12 @@ public class BucketInitializer {
     @Value("${minio.base-bucket-name}")
     private String baseBucketName;
 
-    private final MinioS3Repository minioS3Repository;
+    private final MinioRepository minioRepository;
 
     @PostConstruct
     public void createBaseBucket() throws Exception {
-        if (!minioS3Repository.bucketExist(baseBucketName)) {
-            minioS3Repository.createBucket(baseBucketName);
+        if (!minioRepository.bucketExist(baseBucketName)) {
+            minioRepository.createBucket(baseBucketName);
         }
     }
 
