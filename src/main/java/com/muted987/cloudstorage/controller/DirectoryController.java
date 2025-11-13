@@ -33,6 +33,7 @@ public class DirectoryController {
 
     private final DirectoryService directoryService;
 
+
     @CreateFolder
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
@@ -45,7 +46,6 @@ public class DirectoryController {
         return this.directoryService.createFolder(pathParam.path(), userDetails.getId());
     }
 
-    //TODO: Заменить pathParam для валидации директории
     @GetDirectory
     @GetMapping
     @ResponseStatus(HttpStatus.OK)
