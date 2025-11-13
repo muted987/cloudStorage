@@ -84,7 +84,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(RuntimeException.class)
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
-    public ExceptionMessage handleException(Exception e) {
+    public ExceptionMessage handleException() {
         return ExceptionMessage.builder()
                 .message("unexpected exception")
                 .build();
