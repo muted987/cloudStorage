@@ -6,7 +6,6 @@ import jakarta.validation.constraints.Pattern;
 
 public record QueryParam(
         @NotNull(message="Отсутствует запрос")
-        @Pattern(regexp="^/|(/[\\\\w-]+)+$", message = "Запрос")
         @Schema(description = "Query", example = "file1.txt")
         String query
 ) {
