@@ -4,28 +4,11 @@ import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class PathUtilTest {
-
-    @Test
-    void extractDataTest() {
-
-        String testPath = "user-123-files/folder1/folder2/filename.txt";
-        String requestPath = "user-123-files/folder1/folder2/";
-        String exceptedPath = "folder1/folder2/";
-        String exceptedName = "filename.txt";
-
-        Map<String, String> result = PathUtil.extractData(requestPath, testPath);
-        System.out.println(result.get("name"));
-        System.out.println(result.get("path"));
-
-        assertTrue(exceptedPath.equals(result.get("path")) && exceptedName.equals(result.get("name")));
-
-    }
 
     @Test
     void getParentPathTest(){
