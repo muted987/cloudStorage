@@ -13,6 +13,7 @@ import com.muted987.cloudStorage.controller.payload.QueryParam;
 import com.muted987.cloudStorage.dto.response.resourceResponse.ResourceResponse;
 import com.muted987.cloudStorage.security.CustomUserDetails;
 import com.muted987.cloudStorage.service.minioService.ResourceService;
+import io.minio.errors.ErrorResponseException;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -55,9 +56,9 @@ public class ResourceController {
                                                  )
                                                  @Valid @ModelAttribute PathParam pathParam,
                                                  @NotNull(message = "Отсутствует файл")
-                                                 @RequestPart("object") MultipartFile multipartFile,
-                                                 @AuthenticationPrincipal CustomUserDetails userDetails) throws Exception {
-        return this.resourceService.uploadResource(pathParam.path(), multipartFile, userDetails.getId());
+                                                 @RequestPart("object") MultipartFile[] resources,
+                                                 @AuthenticationPrincipal CustomUserDetails userDetails) {
+        return this.resourceService.uploadResources(pathParam.path(), resources, userDetails.getId());
     }
 
     @DeleteResource
@@ -110,7 +111,7 @@ public class ResourceController {
                                                     required = true
                                             )
                                         @Valid @ModelAttribute PathParam pathParam,
-                                        @AuthenticationPrincipal CustomUserDetails userDetails) {
+                                        @AuthenticationPrincipal CustomUserDetails userDetails) throws ErrorResponseException {
         return this.resourceService.getResource(pathParam.path(), userDetails.getId());
     }
 
