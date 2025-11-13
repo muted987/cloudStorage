@@ -3,6 +3,7 @@ package com.muted987.cloudStorage.controller;
 
 import com.muted987.cloudStorage.dto.response.ExceptionMessage;
 import com.muted987.cloudStorage.exception.ParentFolderNotExist;
+import com.muted987.cloudStorage.exception.PathNotValidException;
 import com.muted987.cloudStorage.exception.ResourceAlreadyExistsException;
 import com.muted987.cloudStorage.exception.ResourceNotFoundException;
 import com.muted987.cloudStorage.exception.UserAlreadyExistException;
@@ -72,10 +73,18 @@ public class GlobalExceptionHandler {
         return errors.get(0);
     }
 
+    @ExceptionHandler(PathNotValidException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ExceptionMessage handlePathNotValidException(PathNotValidException exception) {
+        return ExceptionMessage.builder()
+                .message(exception.getMessage())
+                .build();
+    }
 
-    @ExceptionHandler({Exception.class, RuntimeException.class})
+
+    @ExceptionHandler(RuntimeException.class)
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
-    public ExceptionMessage handleException() {
+    public ExceptionMessage handleException(Exception e) {
         return ExceptionMessage.builder()
                 .message("unexpected exception")
                 .build();
