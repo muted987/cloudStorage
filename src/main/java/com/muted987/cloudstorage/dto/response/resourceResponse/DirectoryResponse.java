@@ -11,6 +11,4 @@ public class DirectoryResponse extends ResourceResponse {
     @Builder.Default
     private ResourceType type = ResourceType.DIRECTORY;
 
-
-
 }
