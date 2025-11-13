@@ -2,9 +2,7 @@ package com.muted987.cloudStorage.utils;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 public class PathUtil {
 
@@ -15,23 +13,6 @@ public class PathUtil {
         for (String path : paths) {
             result = result.concat(path);
         }
-        return result;
-    }
-
-
-    /*
-        Path - formatted path
-        objectName - formatted path
-        Извлекает из пути необходимые данные
-        А именно путь и название файла.
-        Результат - Map<String, String> с двумя ключами path, name
-     */
-    public static Map<String, String> extractData(String path, String objectName) {
-        Map<String, String> result = new HashMap<>();
-        String pathWithoutBaseFolderName = reformatPath(path);
-        String resultName = objectName.substring(path.length());
-        result.put("path", pathWithoutBaseFolderName);
-        result.put("name", resultName);
         return result;
     }
 
@@ -54,6 +35,9 @@ public class PathUtil {
         return path.substring(0, path.lastIndexOf("/") + 1);
     }
 
+    /*
+        ПЕРЕДАВАТЬ БЕЗ ФОРМАТИРОВАНИЯ
+     */
     public static List<String> getParentPaths(String path) {
         List<String> paths = new ArrayList<>();
         while (!path.isEmpty()) {
